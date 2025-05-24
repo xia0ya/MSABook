@@ -1,0 +1,15 @@
+{
+  "name": "book",
+  "version": "1.0.0",
+  "description": "多元统计分析学习笔记",
+  "main": "index.js",
+  "repository": "git@github.com:xia0ya/book.git",
+  "author": "liu xiaoliang <xiaoyalian@outlook.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "vuepress": "^1.9.10"
+  },
+  "scripts": {
+    "dev": "vuepress dev"
+  }
+}

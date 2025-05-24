@@ -1,0 +1,38 @@
+/* 设置全局字体font-family: "Helvetica Neue", Arial, sans-serif; */
+body {
+    
+    background-color: #f9f9f9;
+    color: #333;
+  }
+  
+  /* 标题样式 */
+  h1, h2, h3, h4 {
+    color: #1e90ff;
+  }
+  
+  /* 侧边栏标题样式 */
+  .sidebar-nav h3 {
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  
+  /* 代码块背景色 */
+  .theme-default-content pre {
+    background-color: #2d2d2d !important;
+    color: #f8f8f2 !important;
+  }
+  
+  /* 数学公式加点边距 */
+  .mathjax-block {
+    margin: 1em 0;
+  }
+  
+  /* 链接样式 */
+  a {
+    color: #1e90ff;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  
