@@ -238,7 +238,150 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="&#x5B9E;&#x9A8C;&#x516D;">&#x5B9E;&#x9A8C;&#x516D;</h1>
+                                <h1 id="&#x5B9E;&#x9A8C;&#x516D;-&#x805A;&#x7C7B;&#x5206;&#x6790;">&#x5B9E;&#x9A8C;&#x516D; &#x805A;&#x7C7B;&#x5206;&#x6790;</h1>
+<blockquote>
+<p>&#x8BE5;&#x90E8;&#x5206;&#x4E0D;&#x7B97;&#x56F0;&#x96BE;&#xFF0C;&#x6709;&#x7406;&#x6709;&#x636E;&#x5373;&#x53EF;
+&#x6CE8;&#x610F;&#xFF1A;&#x5982;&#x679C;&#x52A0;&#x5165;&#x5176;&#x4ED6;&#x65B9;&#x6CD5;&#xFF0C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#x66F4;&#x9002;&#x5408;&#xFF08;&#x76F8;&#x6BD4;&#x4E3B;&#x6210;&#x5206;&#x5206;&#x6790;&#xFF09;</p>
+</blockquote>
+<pre><code class="lang-{R}">#&#x5B9E;&#x9A8C;&#x516D;&#xFF1A;&#x805A;&#x7C7B;&#x5206;&#x6790;
+#&#x52A0;&#x8F7D;&#x5FC5;&#x8981;&#x7684;&#x5305;
+library(stats)
+library(factoextra)
+library(cluster)
+
+#--------------------------&#x7B2C;&#x4E00;&#x9898;&#xFF1A;&#x8BED;&#x8A00;&#x805A;&#x7C7B;&#x5206;&#x6790;-------------------------------
+
+#&#x521B;&#x5EFA;&#x8DDD;&#x79BB;&#x77E9;&#x9635;
+dist_matrix &lt;- matrix(c(
+  0, 2, 2, 7, 6, 6, 6, 6, 7, 9, 9,
+  2, 0, 1, 5, 4, 6, 6, 6, 7, 8, 9,
+  2, 1, 0, 6, 5, 6, 5, 5, 6, 8, 9,
+  7, 5, 6, 0, 5, 9, 9, 9, 10, 8, 9,
+  6, 4, 5, 5, 0, 7, 7, 7, 8, 9, 9,
+  6, 6, 6, 9, 7, 0, 2, 1, 5, 10, 9,
+  6, 6, 5, 9, 7, 2, 0, 1, 3, 10, 9,
+  6, 6, 5, 9, 7, 1, 1, 0, 4, 10, 9,
+  7, 7, 6, 10, 8, 5, 3, 4, 0, 10, 9,
+  9, 8, 8, 8, 9, 10, 10, 10, 10, 0, 8,
+  9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 0
+), nrow = 11, byrow = TRUE)
+
+#&#x8BBE;&#x7F6E;&#x884C;&#x540D;&#x548C;&#x5217;&#x540D;
+rownames(dist_matrix) &lt;- c(&quot;E&quot;, &quot;N&quot;, &quot;Da&quot;, &quot;Du&quot;, &quot;G&quot;, &quot;Fr&quot;, &quot;Sp&quot;, &quot;I&quot;, &quot;P&quot;, &quot;H&quot;, &quot;Fi&quot;)
+colnames(dist_matrix) &lt;- c(&quot;E&quot;, &quot;N&quot;, &quot;Da&quot;, &quot;Du&quot;, &quot;G&quot;, &quot;Fr&quot;, &quot;Sp&quot;, &quot;I&quot;, &quot;P&quot;, &quot;H&quot;, &quot;Fi&quot;)
+
+#&#x8F6C;&#x6362;&#x4E3A;&#x8DDD;&#x79BB;&#x5BF9;&#x8C61;
+dist_obj &lt;- as.dist(dist_matrix)
+
+#(1) &#x8FDB;&#x884C;&#x4E0D;&#x540C;&#x65B9;&#x6CD5;&#x7684;&#x805A;&#x7C7B;&#x5206;&#x6790;
+#&#x6700;&#x5C0F;&#x8DDD;&#x79BB;&#x6CD5;&#xFF08;single linkage&#xFF09;
+hc_single &lt;- hclust(dist_obj, method = &quot;single&quot;)
+#&#x6700;&#x5927;&#x8DDD;&#x79BB;&#x6CD5;&#xFF08;complete linkage&#xFF09;
+hc_complete &lt;- hclust(dist_obj, method = &quot;complete&quot;)
+#&#x5E73;&#x5747;&#x8DDD;&#x79BB;&#x6CD5;&#xFF08;average linkage&#xFF09;
+hc_average &lt;- hclust(dist_obj, method = &quot;average&quot;)
+#Ward&#x805A;&#x7C7B;&#x6CD5;
+hc_ward &lt;- hclust(dist_obj, method = &quot;ward.D2&quot;)
+
+#(2) &#x7ED8;&#x5236;&#x6811;&#x72B6;&#x56FE;
+#&#x8BBE;&#x7F6E;&#x56FE;&#x5F62;&#x53C2;&#x6570;
+par(mfrow = c(2, 2))
+
+#&#x6700;&#x5C0F;&#x8DDD;&#x79BB;&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_single, main = &quot;&#x6700;&#x5C0F;&#x8DDD;&#x79BB;&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_single, k = 4, border = &quot;red&quot;)
+
+#&#x6700;&#x5927;&#x8DDD;&#x79BB;&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_complete, main = &quot;&#x6700;&#x5927;&#x8DDD;&#x79BB;&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_complete, k = 4, border = &quot;red&quot;)
+
+#&#x5E73;&#x5747;&#x8DDD;&#x79BB;&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_average, main = &quot;&#x5E73;&#x5747;&#x8DDD;&#x79BB;&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_average, k = 4, border = &quot;red&quot;)
+
+#Ward&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_ward, main = &quot;Ward&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_ward, k = 4, border = &quot;red&quot;)
+
+#&#x91CD;&#x7F6E;&#x56FE;&#x5F62;&#x53C2;&#x6570;
+par(mfrow = c(1, 1))
+
+#--------------------------&#x7B2C;&#x4E8C;&#x9898;&#xFF1A;&#x6D59;&#x6C5F;&#x7701;&#x57CE;&#x5E02;&#x6D88;&#x8D39;&#x652F;&#x51FA;&#x805A;&#x7C7B;&#x5206;&#x6790;-------------------------------
+
+#&#x521B;&#x5EFA;&#x6570;&#x636E;&#x6846;
+consumption_data &lt;- data.frame(
+  city = c(&quot;&#x676D;&#x5DDE;&#x5E02;&quot;, &quot;&#x5B81;&#x6CE2;&#x5E02;&quot;, &quot;&#x6E29;&#x5DDE;&#x5E02;&quot;, &quot;&#x5609;&#x5174;&#x5E02;&quot;, &quot;&#x6E56;&#x5DDE;&#x5E02;&quot;, &quot;&#x7ECD;&#x5174;&#x5E02;&quot;, 
+           &quot;&#x91D1;&#x534E;&#x5E02;&quot;, &quot;&#x8862;&#x5DDE;&#x5E02;&quot;, &quot;&#x821F;&#x5C71;&#x5E02;&quot;, &quot;&#x53F0;&#x5DDE;&#x5E02;&quot;, &quot;&#x4E3D;&#x6C34;&#x5E02;&quot;),
+  food = c(8528, 8068, 9936, 7709, 7949, 8744, 6952, 6133, 8380, 7175, 6719),
+  clothing = c(2421, 2406, 2505, 2074, 2568, 2570, 2472, 2026, 2575, 2156, 2481),
+  housing = c(2305, 1741, 2248, 2137, 1523, 1924, 1933, 1195, 1830, 1554, 1531),
+  household = c(1580, 1324, 1240, 1533, 1324, 1192, 1442, 1063, 1293, 1106, 1194),
+  medical = c(1265, 872, 1113, 1553, 1182, 1041, 1714, 1380, 1632, 1049, 1620),
+  transport = c(4725, 4300, 4079, 5241, 4056, 4747, 4722, 3055, 3462, 3706, 3364),
+  education = c(2998, 3424, 3627, 3503, 2793, 3355, 3070, 2058, 2934, 3072, 2350),
+  other = c(1010, 994, 875, 1101, 732, 897, 866, 495, 1355, 824, 550)
+)
+
+#&#x6570;&#x636E;&#x6807;&#x51C6;&#x5316;
+scaled_data &lt;- scale(consumption_data[, -1])
+rownames(scaled_data) &lt;- consumption_data$city
+
+#&#x8BA1;&#x7B97;&#x6B27;&#x6C0F;&#x8DDD;&#x79BB;
+dist_matrix_city &lt;- dist(scaled_data)
+
+#(1) &#x8FDB;&#x884C;&#x4E0D;&#x540C;&#x65B9;&#x6CD5;&#x7684;&#x805A;&#x7C7B;&#x5206;&#x6790;
+#&#x6700;&#x5C0F;&#x8DDD;&#x79BB;&#x6CD5;
+hc_single_city &lt;- hclust(dist_matrix_city, method = &quot;single&quot;)
+#&#x6700;&#x5927;&#x8DDD;&#x79BB;&#x6CD5;
+hc_complete_city &lt;- hclust(dist_matrix_city, method = &quot;complete&quot;)
+#&#x5E73;&#x5747;&#x8DDD;&#x79BB;&#x6CD5;
+hc_average_city &lt;- hclust(dist_matrix_city, method = &quot;average&quot;)
+
+#(2) &#x7ED8;&#x5236;&#x6811;&#x72B6;&#x56FE;
+#&#x8BBE;&#x7F6E;&#x56FE;&#x5F62;&#x53C2;&#x6570;
+par(mfrow = c(1, 3))
+
+#&#x6700;&#x5C0F;&#x8DDD;&#x79BB;&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_single_city, main = &quot;&#x6700;&#x5C0F;&#x8DDD;&#x79BB;&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_single_city, k = 3, border = &quot;red&quot;)
+
+#&#x6700;&#x5927;&#x8DDD;&#x79BB;&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_complete_city, main = &quot;&#x6700;&#x5927;&#x8DDD;&#x79BB;&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_complete_city, k = 3, border = &quot;red&quot;)
+
+#&#x5E73;&#x5747;&#x8DDD;&#x79BB;&#x6CD5;&#x6811;&#x72B6;&#x56FE;
+plot(hc_average_city, main = &quot;&#x5E73;&#x5747;&#x8DDD;&#x79BB;&#x6CD5;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_average_city, k = 3, border = &quot;red&quot;)
+
+#&#x91CD;&#x7F6E;&#x56FE;&#x5F62;&#x53C2;&#x6570;
+par(mfrow = c(1, 1))
+
+#(3) &#x5BF9;&#x5404;&#x9879;&#x6D88;&#x8D39;&#x652F;&#x51FA;&#x8FDB;&#x884C;&#x805A;&#x7C7B;&#x5206;&#x6790;&#xFF08;&#x9644;&#x52A0;&#x9898;&#xFF09;
+# &#x8F6C;&#x7F6E;&#x6570;&#x636E;&#x6846;&#xFF0C;&#x4F7F;&#x53D8;&#x91CF;&#x6210;&#x4E3A;&#x89C2;&#x6D4B;
+consumption_by_category &lt;- t(consumption_data[, -1])
+colnames(consumption_by_category) &lt;- consumption_data$city
+
+#&#x6807;&#x51C6;&#x5316;
+scaled_category &lt;- scale(consumption_by_category)
+
+#&#x8BA1;&#x7B97;&#x8DDD;&#x79BB;
+dist_category &lt;- dist(scaled_category)
+
+#&#x8FDB;&#x884C;&#x805A;&#x7C7B;&#x5206;&#x6790;
+hc_category &lt;- hclust(dist_category, method = &quot;average&quot;)
+
+#&#x7ED8;&#x5236;&#x6811;&#x72B6;&#x56FE;
+plot(hc_category, main = &quot;&#x6D88;&#x8D39;&#x652F;&#x51FA;&#x7C7B;&#x522B;&#x805A;&#x7C7B;&#x6811;&#x72B6;&#x56FE;&quot;,
+     xlab = &quot;&quot;, ylab = &quot;&#x8DDD;&#x79BB;&quot;, sub = &quot;&quot;)
+rect.hclust(hc_category, k = 3, border = &quot;red&quot;)
+</code></pre>
 
                                 
                                 </section>
@@ -282,7 +425,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"实验六","level":"1.7","depth":1,"next":{"title":"实验七","level":"1.8","depth":1,"path":"exper/ex7/README.md","ref":"exper/ex7/README.md","articles":[]},"previous":{"title":"实验五","level":"1.6","depth":1,"path":"exper/ex5/README.md","ref":"exper/ex5/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex6/README.md","mtime":"2025-05-23T12:00:34.751Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-24T06:50:44.437Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"实验六","level":"1.7","depth":1,"next":{"title":"实验七","level":"1.8","depth":1,"path":"exper/ex7/README.md","ref":"exper/ex7/README.md","articles":[]},"previous":{"title":"实验五","level":"1.6","depth":1,"path":"exper/ex5/README.md","ref":"exper/ex5/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex6/README.md","mtime":"2025-05-25T15:21:53.776Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-25T15:31:30.048Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>

@@ -238,7 +238,249 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="&#x5B9E;&#x9A8C;&#x4E94;">&#x5B9E;&#x9A8C;&#x4E94;</h1>
+                                <h1 id="&#x5B9E;&#x9A8C;&#x4E94;&#xFF1A;&#x5224;&#x522B;&#x5206;&#x6790;">&#x5B9E;&#x9A8C;&#x4E94;&#xFF1A;&#x5224;&#x522B;&#x5206;&#x6790;</h1>
+<blockquote>
+<p>&#x8FD9;&#x4E2A;&#x5BF9;&#x6211;&#x76EE;&#x524D;&#x662F;&#x964C;&#x751F;&#x7684;&#xFF0C;&#x9996;&#x5148;&#x719F;&#x6089;&#x8FD9;&#x4E2A;</p>
+</blockquote>
+<pre><code class="lang-{R}">#&#x5B9E;&#x9A8C;&#x4E94;&#xFF1A;&#x5224;&#x522B;&#x5206;&#x6790;
+#&#x52A0;&#x8F7D;&#x5FC5;&#x8981;&#x7684;&#x5305;
+library(MASS)
+library(ggplot2)
+
+#--------------------------&#x7B2C;&#x4E00;&#x9898;&#xFF1A;&#x8840;&#x53CB;&#x75C5;A&#x643A;&#x5E26;&#x8005;&#x5224;&#x522B;-------------------------------
+
+#&#x521B;&#x5EFA;&#x8BAD;&#x7EC3;&#x6570;&#x636E;
+group1 &lt;- data.frame(
+  x1 = c(-0.0056, -0.1698, -0.3469, -0.0894, -0.1679, -0.0836, -0.1979, -0.0762, -0.1913, -0.1092,
+         -0.5268, -0.0842, -0.0225, 0.0084, -0.1827, 0.1237, -0.4702, -0.1519, 0.0006, -0.2015,
+         -0.1932, 0.1507, -0.1259, -0.1551, -0.1952, 0.0291, -0.228, -0.0997, -0.1972, -0.0867),
+  x2 = c(-0.1657, -0.1585, -0.1879, 0.0064, 0.0713, 0.0106, -0.0005, 0.0392, -0.2123, -0.119,
+         -0.4773, 0.0248, -0.058, 0.0782, -0.1138, 0.214, -0.3099, -0.0686, -0.1153, -0.0498,
+         -0.2293, 0.0933, -0.0669, -0.1232, -0.1007, 0.0442, -0.171, -0.0733, -0.0607, -0.056),
+  Group = 1
+)
+
+group2 &lt;- data.frame(
+  x1 = c(-0.3478, -0.3618, -0.4986, -0.5015, -0.1326, -0.6911, -0.3608, -0.4535, -0.3479, -0.3539,
+         -0.4719, -0.361, -0.3226, -0.4319, -0.2734, -0.5573, -0.3755, -0.495, -0.5107, -0.1652,
+         -0.2447, -0.4232, -0.2375, -0.2205, -0.2154, -0.3447, -0.254, -0.3778, -0.4046, -0.0639,
+         -0.3351, -0.0149, -0.0312, -0.174, -0.1416, -0.1508, -0.0964, -0.2642, -0.0234, -0.3352,
+         -0.1878, -0.1744, -0.4055, -0.2444, -0.4784),
+  x2 = c(0.1151, -0.2008, -0.086, -0.2984, 0.0097, -0.339, 0.1237, -0.1682, -0.1721, 0.0722,
+         -0.1079, -0.0399, 0.167, -0.0687, -0.002, 0.0548, -0.1865, -0.0153, -0.2483, 0.2132,
+         -0.0407, -0.0998, 0.2876, 0.0046, -0.0219, 0.0097, -0.0573, -0.2682, -0.1162, 0.1569,
+         -0.1368, 0.1539, 0.14, -0.0776, 0.1642, 0.1137, 0.0531, 0.0867, 0.0804, 0.0875,
+         0.251, 0.1892, -0.2418, 0.1614, 0.0282),
+  Group = 2
+)
+
+#&#x5408;&#x5E76;&#x8BAD;&#x7EC3;&#x6570;&#x636E;
+train_data &lt;- rbind(group1, group2)
+
+#&#x65B0;&#x89C2;&#x6D4B;&#x6570;&#x636E;
+new_obs &lt;- data.frame(
+  x1 = c(-0.112, -0.059, 0.064, -0.043, -0.050),
+  x2 = c(-0.279, -0.068, 0.012, -0.052, -0.098)
+)
+
+#(1) &#x68C0;&#x9A8C;&#x4E8C;&#x5143;&#x6B63;&#x6001;&#x6027;
+#&#x5BF9;&#x4E24;&#x7EC4;&#x6570;&#x636E;&#x5206;&#x522B;&#x8FDB;&#x884C;Shapiro-Wilk&#x68C0;&#x9A8C;
+shapiro.test(group1$x1)
+shapiro.test(group1$x2)
+shapiro.test(group2$x1)
+shapiro.test(group2$x2)
+
+#(2) &#x8BA1;&#x7B97;&#x534F;&#x65B9;&#x5DEE;&#x77E9;&#x9635;
+cov1 &lt;- cov(group1[,1:2])
+cov2 &lt;- cov(group2[,1:2])
+print(&quot;Group 1&#x534F;&#x65B9;&#x5DEE;&#x77E9;&#x9635;&#xFF1A;&quot;)
+print(cov1)
+print(&quot;Group 2&#x534F;&#x65B9;&#x5DEE;&#x77E9;&#x9635;&#xFF1A;&quot;)
+print(cov2)
+
+#&#x68C0;&#x9A8C;&#x534F;&#x65B9;&#x5DEE;&#x77E9;&#x9635;&#x662F;&#x5426;&#x76F8;&#x7B49;
+#&#x4F7F;&#x7528;Box&apos;s M&#x68C0;&#x9A8C;
+box_m_test &lt;- function(x, y) {
+  n1 &lt;- nrow(x)
+  n2 &lt;- nrow(y)
+  p &lt;- ncol(x)
+
+  S1 &lt;- cov(x)
+  S2 &lt;- cov(y)
+  S_pooled &lt;- ((n1-1)*S1 + (n2-1)*S2)/(n1+n2-2)
+
+  M &lt;- (n1+n2-2)*log(det(S_pooled)) - (n1-1)*log(det(S1)) - (n2-1)*log(det(S2))
+  c &lt;- (2*p^2 + 3*p - 1)/(6*(p+1)) * (1/(n1-1) + 1/(n2-1) - 1/(n1+n2-2))
+
+  chi_sq &lt;- M*(1-c)
+  df &lt;- p*(p+1)/2
+
+  p_value &lt;- 1 - pchisq(chi_sq, df)
+  return(list(statistic = chi_sq, p_value = p_value))
+}
+
+box_m_result &lt;- box_m_test(group1[,1:2], group2[,1:2])
+print(&quot;Box&apos;s M&#x68C0;&#x9A8C;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(box_m_result)
+
+#(3) &#x6563;&#x70B9;&#x56FE;
+#&#x521B;&#x5EFA;&#x5305;&#x542B;&#x8BAD;&#x7EC3;&#x6570;&#x636E;&#x548C;&#x65B0;&#x89C2;&#x6D4B;&#x7684;&#x6563;&#x70B9;&#x56FE;
+plot_data &lt;- rbind(
+  data.frame(x1 = train_data$x1, x2 = train_data$x2, 
+             Group = factor(train_data$Group), Type = &quot;Training&quot;),
+  data.frame(x1 = new_obs$x1, x2 = new_obs$x2, 
+             Group = factor(3), Type = &quot;New&quot;)
+)
+
+ggplot(plot_data, aes(x = x1, y = x2, color = Group, shape = Type)) +
+  geom_point() +
+  scale_color_manual(values = c(&quot;1&quot; = &quot;blue&quot;, &quot;2&quot; = &quot;red&quot;, &quot;3&quot; = &quot;green&quot;)) +
+  scale_shape_manual(values = c(&quot;Training&quot; = 16, &quot;New&quot; = 17)) +
+  labs(title = &quot;&#x8840;&#x53CB;&#x75C5;A&#x643A;&#x5E26;&#x8005;&#x6570;&#x636E;&#x6563;&#x70B9;&#x56FE;&quot;,
+       x = &quot;log10(AHF activity)&quot;,
+       y = &quot;log10(AHF antigen)&quot;) +
+  theme_minimal()
+
+#(4) &#x7EBF;&#x6027;&#x5224;&#x522B;&#x5206;&#x6790;
+lda_model &lt;- lda(Group ~ x1 + x2, data = train_data)
+lda_pred &lt;- predict(lda_model, new_obs)
+print(&quot;LDA&#x9884;&#x6D4B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(lda_pred$class)
+
+#(5) &#x4E8C;&#x6B21;&#x5224;&#x522B;&#x5206;&#x6790;
+qda_model &lt;- qda(Group ~ x1 + x2, data = train_data)
+qda_pred &lt;- predict(qda_model, new_obs)
+print(&quot;QDA&#x9884;&#x6D4B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(qda_pred$class)
+
+#(6) &#x6BD4;&#x8F83;&#x8BEF;&#x5224;&#x7387;
+#&#x5BF9;&#x8BAD;&#x7EC3;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x4EA4;&#x53C9;&#x9A8C;&#x8BC1;
+lda_cv &lt;- lda(Group ~ x1 + x2, data = train_data, CV = TRUE)
+qda_cv &lt;- qda(Group ~ x1 + x2, data = train_data, CV = TRUE)
+
+lda_error &lt;- mean(lda_cv$class != train_data$Group)
+qda_error &lt;- mean(qda_cv$class != train_data$Group)
+
+print(&quot;LDA&#x8BEF;&#x5224;&#x7387;&#xFF1A;&quot;)
+print(lda_error)
+print(&quot;QDA&#x8BEF;&#x5224;&#x7387;&#xFF1A;&quot;)
+print(qda_error)
+
+#--------------------------&#x7B2C;&#x4E8C;&#x9898;&#xFF1A;&#x5546;&#x5B66;&#x7814;&#x7A76;&#x751F;&#x9662;&#x62DB;&#x751F;&#x5224;&#x522B;-------------------------------
+
+#&#x521B;&#x5EFA;&#x6570;&#x636E;
+accept &lt;- data.frame(
+  GPA = c(2.96, 3.14, 3.22, 3.29, 3.69, 3.46, 3.03, 3.19, 3.63, 3.59, 3.3, 3.4, 3.5, 3.78, 3.44,
+          3.48, 3.47, 3.35, 3.39, 3.28, 3.21, 3.58, 3.33, 3.4, 3.38, 3.26, 3.6, 3.37, 3.8, 3.76, 3.24),
+  GMAT = c(596, 473, 482, 527, 505, 693, 626, 663, 447, 588, 563, 553, 572, 591, 692, 528, 552, 520,
+           543, 523, 530, 564, 565, 431, 605, 664, 609, 559, 521, 646, 467),
+  Group = 1
+)
+
+reject &lt;- data.frame(
+  GPA = c(2.54, 2.43, 2.2, 2.36, 2.57, 2.35, 2.51, 2.51, 2.36, 2.36, 2.66, 2.68, 2.48, 2.46, 2.63,
+          2.44, 2.13, 2.41, 2.55, 2.31, 2.41, 2.19, 2.35, 2.6, 2.55, 2.72, 2.85, 2.9),
+  GMAT = c(446, 425, 474, 531, 542, 406, 412, 458, 399, 482, 420, 414, 533, 509, 504, 336, 408, 469,
+           538, 505, 489, 411, 321, 394, 528, 399, 381, 384),
+  Group = 2
+)
+
+wait &lt;- data.frame(
+  GPA = c(2.86, 2.85, 3.14, 3.28, 2.89, 3.15, 3.5, 2.89, 2.8, 3.13, 3.01, 2.79, 2.89, 2.91, 2.75,
+          2.73, 3.12, 3.08, 3.03, 3, 3.03, 3.05, 2.85, 3.01, 3.03, 3.04),
+  GMAT = c(494, 496, 419, 371, 447, 313, 402, 485, 444, 416, 471, 490, 431, 446, 546, 467, 463, 440,
+           419, 509, 438, 399, 483, 453, 414, 446),
+  Group = 3
+)
+
+#&#x5408;&#x5E76;&#x6570;&#x636E;
+admission_data &lt;- rbind(accept, reject, wait)
+
+#(1) &#x6563;&#x70B9;&#x56FE;
+ggplot(admission_data, aes(x = GPA, y = GMAT, color = factor(Group))) +
+  geom_point() +
+  scale_color_manual(values = c(&quot;1&quot; = &quot;green&quot;, &quot;2&quot; = &quot;red&quot;, &quot;3&quot; = &quot;blue&quot;),
+                    labels = c(&quot;&#x63A5;&#x53D7;&quot;, &quot;&#x4E0D;&#x63A5;&#x53D7;&quot;, &quot;&#x5F85;&#x5B9A;&quot;)) +
+  labs(title = &quot;&#x5546;&#x5B66;&#x7814;&#x7A76;&#x751F;&#x9662;&#x7533;&#x8BF7;&#x8005;&#x6570;&#x636E;&#x6563;&#x70B9;&#x56FE;&quot;,
+       x = &quot;GPA&quot;,
+       y = &quot;GMAT&quot;,
+       color = &quot;&#x5206;&#x7C7B;&quot;) +
+  theme_minimal()
+
+#(2) &#x7EBF;&#x6027;&#x5224;&#x522B;&#x5206;&#x6790;
+lda_admission &lt;- lda(Group ~ GPA + GMAT, data = admission_data)
+print(&quot;LDA&#x6A21;&#x578B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(lda_admission)
+
+#(3) &#x4E8C;&#x6B21;&#x5224;&#x522B;&#x5206;&#x6790;
+qda_admission &lt;- qda(Group ~ GPA + GMAT, data = admission_data)
+print(&quot;QDA&#x6A21;&#x578B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(qda_admission)
+
+#(4) &#x6BD4;&#x8F83;&#x8BEF;&#x5224;&#x7387;
+lda_cv_admission &lt;- lda(Group ~ GPA + GMAT, data = admission_data, CV = TRUE)
+qda_cv_admission &lt;- qda(Group ~ GPA + GMAT, data = admission_data, CV = TRUE)
+
+lda_error_admission &lt;- mean(lda_cv_admission$class != admission_data$Group)
+qda_error_admission &lt;- mean(qda_cv_admission$class != admission_data$Group)
+
+print(&quot;LDA&#x8BEF;&#x5224;&#x7387;&#xFF1A;&quot;)
+print(lda_error_admission)
+print(&quot;QDA&#x8BEF;&#x5224;&#x7387;&#xFF1A;&quot;)
+print(qda_error_admission)
+
+#(5) &#x65B0;&#x7533;&#x8BF7;&#x8005;&#x5224;&#x522B;
+new_applicant &lt;- data.frame(GPA = 3.21, GMAT = 497)
+
+#&#x5728;&#x6563;&#x70B9;&#x56FE;&#x4E2D;&#x6DFB;&#x52A0;&#x65B0;&#x7533;&#x8BF7;&#x8005;
+ggplot(admission_data, aes(x = GPA, y = GMAT, color = factor(Group))) +
+  geom_point() +
+  geom_point(data = new_applicant, aes(x = GPA, y = GMAT), 
+             color = &quot;purple&quot;, size = 3, shape = 17) +
+  scale_color_manual(values = c(&quot;1&quot; = &quot;green&quot;, &quot;2&quot; = &quot;red&quot;, &quot;3&quot; = &quot;blue&quot;),
+                    labels = c(&quot;&#x63A5;&#x53D7;&quot;, &quot;&#x4E0D;&#x63A5;&#x53D7;&quot;, &quot;&#x5F85;&#x5B9A;&quot;)) +
+  labs(title = &quot;&#x5546;&#x5B66;&#x7814;&#x7A76;&#x751F;&#x9662;&#x7533;&#x8BF7;&#x8005;&#x6570;&#x636E;&#x6563;&#x70B9;&#x56FE;&#xFF08;&#x542B;&#x65B0;&#x7533;&#x8BF7;&#x8005;&#xFF09;&quot;,
+       x = &quot;GPA&quot;,
+       y = &quot;GMAT&quot;,
+       color = &quot;&#x5206;&#x7C7B;&quot;) +
+  theme_minimal()
+
+#&#x4F7F;&#x7528;LDA&#x548C;QDA&#x8FDB;&#x884C;&#x9884;&#x6D4B;
+lda_pred_new &lt;- predict(lda_admission, new_applicant)
+qda_pred_new &lt;- predict(qda_admission, new_applicant)
+
+print(&quot;LDA&#x9884;&#x6D4B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(lda_pred_new$class)
+print(&quot;QDA&#x9884;&#x6D4B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(qda_pred_new$class)
+
+#(6) &#x68C0;&#x67E5;&#x5F02;&#x5E38;&#x503C;
+#&#x8BA1;&#x7B97;&#x9A6C;&#x6C0F;&#x8DDD;&#x79BB;
+mahalanobis_dist &lt;- mahalanobis(admission_data[,1:2], 
+                               colMeans(admission_data[,1:2]), 
+                               cov(admission_data[,1:2]))
+
+#&#x627E;&#x51FA;&#x53EF;&#x80FD;&#x7684;&#x5F02;&#x5E38;&#x503C;&#xFF08;&#x9A6C;&#x6C0F;&#x8DDD;&#x79BB;&#x5927;&#x4E8E;3&#x7684;&#x89C2;&#x6D4B;&#xFF09;
+outliers &lt;- which(mahalanobis_dist &gt; 3)
+print(&quot;&#x53EF;&#x80FD;&#x7684;&#x5F02;&#x5E38;&#x503C;&#xFF1A;&quot;)
+print(admission_data[outliers,])
+
+#&#x79FB;&#x9664;&#x5F02;&#x5E38;&#x503C;&#x540E;&#x91CD;&#x65B0;&#x8FDB;&#x884C;&#x5224;&#x522B;&#x5206;&#x6790;
+clean_data &lt;- admission_data[-outliers,]
+
+#&#x91CD;&#x65B0;&#x8BAD;&#x7EC3;&#x6A21;&#x578B;
+lda_clean &lt;- lda(Group ~ GPA + GMAT, data = clean_data)
+qda_clean &lt;- qda(Group ~ GPA + GMAT, data = clean_data)
+
+#&#x5BF9;&#x65B0;&#x7533;&#x8BF7;&#x8005;&#x8FDB;&#x884C;&#x9884;&#x6D4B;
+lda_pred_clean &lt;- predict(lda_clean, new_applicant)
+qda_pred_clean &lt;- predict(qda_clean, new_applicant)
+
+print(&quot;&#x79FB;&#x9664;&#x5F02;&#x5E38;&#x503C;&#x540E;&#x7684;LDA&#x9884;&#x6D4B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(lda_pred_clean$class)
+print(&quot;&#x79FB;&#x9664;&#x5F02;&#x5E38;&#x503C;&#x540E;&#x7684;QDA&#x9884;&#x6D4B;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(qda_pred_clean$class)
+</code></pre>
 
                                 
                                 </section>
@@ -282,7 +524,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"实验五","level":"1.6","depth":1,"next":{"title":"实验六","level":"1.7","depth":1,"path":"exper/ex6/README.md","ref":"exper/ex6/README.md","articles":[]},"previous":{"title":"实验四","level":"1.5","depth":1,"path":"exper/ex4/README.md","ref":"exper/ex4/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex5/README.md","mtime":"2025-05-23T12:00:34.751Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-24T06:50:44.437Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"实验五","level":"1.6","depth":1,"next":{"title":"实验六","level":"1.7","depth":1,"path":"exper/ex6/README.md","ref":"exper/ex6/README.md","articles":[]},"previous":{"title":"实验四","level":"1.5","depth":1,"path":"exper/ex4/README.md","ref":"exper/ex4/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex5/README.md","mtime":"2025-05-25T15:11:06.520Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-25T15:31:30.048Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>

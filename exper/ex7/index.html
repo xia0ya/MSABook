@@ -237,6 +237,181 @@
                                 <section class="normal markdown-section">
                                 
                                 <h1 id="&#x5B9E;&#x9A8C;&#x4E03;">&#x5B9E;&#x9A8C;&#x4E03;</h1>
+<pre><code class="lang-{R}">#&#x5B9E;&#x9A8C;&#x4E03;&#xFF1A;&#x5355;&#x56E0;&#x7D20;&#x591A;&#x5143;&#x65B9;&#x5DEE;&#x5206;&#x6790;
+#&#x52A0;&#x8F7D;&#x5FC5;&#x8981;&#x7684;&#x5305;
+library(MASS)
+library(car)
+library(mvnormtest)
+library(ggplot2)
+
+#--------------------------&#x7B2C;&#x4E00;&#x9898;&#xFF1A;&#x72AF;&#x4EBA;&#x8033;&#x6735;&#x957F;&#x5EA6;&#x5206;&#x6790;-------------------------------
+
+#&#x521B;&#x5EFA;&#x6570;&#x636E;&#x6846;
+normal_prisoners &lt;- data.frame(
+  left_ear = c(59, 60, 58, 59, 50, 59, 62, 63, 68, 63, 66, 56, 62, 66, 65, 61, 60, 60, 58, 58),
+  right_ear = c(59, 65, 62, 59, 48, 65, 62, 62, 72, 66, 63, 56, 64, 68, 66, 60, 64, 57, 60, 59),
+  group = &quot;&#x666E;&#x901A;&#x72AF;&#x4EBA;&quot;
+)
+
+crazy_prisoners &lt;- data.frame(
+  left_ear = c(70, 69, 65, 62, 59, 55, 60, 58, 65, 67, 60, 53, 66, 60, 59, 58, 60, 54, 62, 59),
+  right_ear = c(69, 68, 65, 60, 56, 58, 58, 64, 67, 62, 57, 55, 65, 53, 58, 54, 56, 59, 66, 61),
+  group = &quot;&#x75AF;&#x72C2;&#x72AF;&#x4EBA;&quot;
+)
+
+other_prisoners &lt;- data.frame(
+  left_ear = c(63, 56, 62, 59, 62, 50, 63, 61, 55, 63, 65, 64, 65, 67, 55, 56, 65, 62, 55, 58),
+  right_ear = c(63, 57, 62, 58, 58, 57, 63, 62, 59, 63, 70, 64, 65, 67, 55, 56, 67, 65, 61, 58),
+  group = &quot;&#x5176;&#x4ED6;&#x72AF;&#x4EBA;&quot;
+)
+
+#&#x5408;&#x5E76;&#x6570;&#x636E;
+prisoners_data &lt;- rbind(normal_prisoners, crazy_prisoners, other_prisoners)
+prisoners_data$group &lt;- factor(prisoners_data$group)
+
+#(1) &#x68C0;&#x9A8C;&#x524D;&#x63D0;&#x6761;&#x4EF6;
+#&#x6B63;&#x6001;&#x6027;&#x68C0;&#x9A8C;
+#&#x5BF9;&#x6BCF;&#x4E2A;&#x7EC4;&#x5206;&#x522B;&#x8FDB;&#x884C;Shapiro-Wilk&#x68C0;&#x9A8C;
+normal_test &lt;- by(prisoners_data[, 1:2], prisoners_data$group, function(x) {
+  apply(x, 2, shapiro.test)
+})
+print(&quot;&#x6B63;&#x6001;&#x6027;&#x68C0;&#x9A8C;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(normal_test)
+
+#&#x65B9;&#x5DEE;&#x9F50;&#x6027;&#x68C0;&#x9A8C;
+#&#x4F7F;&#x7528;Box&apos;s M&#x68C0;&#x9A8C;
+box_m_test &lt;- function(x, y) {
+  n1 &lt;- nrow(x)
+  n2 &lt;- nrow(y)
+  p &lt;- ncol(x)
+
+  S1 &lt;- cov(x)
+  S2 &lt;- cov(y)
+  S_pooled &lt;- ((n1-1)*S1 + (n2-1)*S2)/(n1+n2-2)
+
+  M &lt;- (n1+n2-2)*log(det(S_pooled)) - (n1-1)*log(det(S1)) - (n2-1)*log(det(S2))
+  c &lt;- (2*p^2 + 3*p - 1)/(6*(p+1)) * (1/(n1-1) + 1/(n2-1) - 1/(n1+n2-2))
+
+  chi_sq &lt;- M*(1-c)
+  df &lt;- p*(p+1)/2
+
+  p_value &lt;- 1 - pchisq(chi_sq, df)
+  return(list(statistic = chi_sq, p_value = p_value))
+}
+
+#&#x5BF9;&#x4E09;&#x7EC4;&#x8FDB;&#x884C;&#x4E24;&#x4E24;&#x6BD4;&#x8F83;
+groups &lt;- split(prisoners_data[, 1:2], prisoners_data$group)
+box_m_results &lt;- list(
+  normal_crazy = box_m_test(groups[[1]], groups[[2]]),
+  normal_other = box_m_test(groups[[1]], groups[[3]]),
+  crazy_other = box_m_test(groups[[2]], groups[[3]])
+)
+print(&quot;Box&apos;s M&#x68C0;&#x9A8C;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(box_m_results)
+
+#(2) &#x591A;&#x5143;&#x65B9;&#x5DEE;&#x5206;&#x6790;
+# &#x4F7F;&#x7528;manova&#x51FD;&#x6570;&#x8FDB;&#x884C;&#x591A;&#x5143;&#x65B9;&#x5DEE;&#x5206;&#x6790;
+manova_result &lt;- manova(cbind(left_ear, right_ear) ~ group, data = prisoners_data)
+summary(manova_result, test = &quot;Wilks&quot;)
+summary(manova_result, test = &quot;Pillai&quot;)
+summary(manova_result, test = &quot;Hotelling-Lawley&quot;)
+summary(manova_result, test = &quot;Roy&quot;)
+
+#&#x7ED8;&#x5236;&#x7BB1;&#x7EBF;&#x56FE;
+#&#x5DE6;&#x8033;&#x957F;&#x5EA6;&#x7BB1;&#x7EBF;&#x56FE;
+ggplot(prisoners_data, aes(x = group, y = left_ear, fill = group)) +
+  geom_boxplot() +
+  labs(title = &quot;&#x4E0D;&#x540C;&#x7EC4;&#x522B;&#x72AF;&#x4EBA;&#x5DE6;&#x8033;&#x957F;&#x5EA6;&#x5206;&#x5E03;&quot;,
+       x = &quot;&#x7EC4;&#x522B;&quot;,
+       y = &quot;&#x5DE6;&#x8033;&#x957F;&#x5EA6;&quot;) +
+  theme_minimal()
+
+#&#x53F3;&#x8033;&#x957F;&#x5EA6;&#x7BB1;&#x7EBF;&#x56FE;
+ggplot(prisoners_data, aes(x = group, y = right_ear, fill = group)) +
+  geom_boxplot() +
+  labs(title = &quot;&#x4E0D;&#x540C;&#x7EC4;&#x522B;&#x72AF;&#x4EBA;&#x53F3;&#x8033;&#x957F;&#x5EA6;&#x5206;&#x5E03;&quot;,
+       x = &quot;&#x7EC4;&#x522B;&quot;,
+       y = &quot;&#x53F3;&#x8033;&#x957F;&#x5EA6;&quot;) +
+  theme_minimal()
+
+#--------------------------&#x7B2C;&#x4E8C;&#x9898;&#xFF1A;&#x516C;&#x53F8;&#x503A;&#x5238;&#x8D22;&#x52A1;&#x7279;&#x5F81;&#x5206;&#x6790;-------------------------------
+
+#&#x521B;&#x5EFA;&#x6570;&#x636E;&#x6846;&#xFF08;&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x793A;&#x4F8B;&#x6570;&#x636E;&#xFF0C;&#x5B9E;&#x9645;&#x6570;&#x636E;&#x9700;&#x8981;&#x6839;&#x636E;&#x9898;&#x76EE;&#x63D0;&#x4F9B;&#x7684;&#x6570;&#x636E;&#x8FDB;&#x884C;&#x4FEE;&#x6539;&#xFF09;
+aa_bonds &lt;- data.frame(
+  current_ratio = rnorm(20, mean = 2.5, sd = 0.5),  # &#x6D41;&#x52A8;&#x6BD4;&#x7387;
+  long_term_rate = rnorm(20, mean = 4.5, sd = 0.8),  # &#x957F;&#x671F;&#x5229;&#x7387;
+  debt_equity_ratio = rnorm(20, mean = 1.2, sd = 0.3),  # &#x503A;&#x52A1;&#x80A1;&#x672C;&#x6BD4;&#x7387;
+  roe = rnorm(20, mean = 15, sd = 3),  # &#x80A1;&#x672C;&#x56DE;&#x62A5;&#x7387;
+  group = &quot;Aa&quot;
+)
+
+baa_bonds &lt;- data.frame(
+  current_ratio = rnorm(20, mean = 1.8, sd = 0.6),
+  long_term_rate = rnorm(20, mean = 5.5, sd = 1.0),
+  debt_equity_ratio = rnorm(20, mean = 1.8, sd = 0.4),
+  roe = rnorm(20, mean = 10, sd = 4),
+  group = &quot;Baa&quot;
+)
+
+#&#x5408;&#x5E76;&#x6570;&#x636E;
+bonds_data &lt;- rbind(aa_bonds, baa_bonds)
+bonds_data$group &lt;- factor(bonds_data$group)
+
+#(1) &#x68C0;&#x9A8C;&#x5408;&#x5E76;&#x65B9;&#x5DEE;&#x662F;&#x5426;&#x5408;&#x9002;
+# &#x4F7F;&#x7528;Box&apos;s M&#x68C0;&#x9A8C;
+box_m_bonds &lt;- box_m_test(aa_bonds[, 1:4], baa_bonds[, 1:4])
+print(&quot;&#x503A;&#x5238;&#x6570;&#x636E;Box&apos;s M&#x68C0;&#x9A8C;&#x7ED3;&#x679C;&#xFF1A;&quot;)
+print(box_m_bonds)
+
+#(2) &#x68C0;&#x9A8C;&#x4E24;&#x7EC4;&#x503A;&#x5238;&#x662F;&#x5426;&#x5B58;&#x5728;&#x8D22;&#x52A1;&#x7279;&#x5F81;&#x4E0A;&#x7684;&#x5DEE;&#x5F02;
+# &#x4F7F;&#x7528;manova&#x51FD;&#x6570;&#x8FDB;&#x884C;&#x591A;&#x5143;&#x65B9;&#x5DEE;&#x5206;&#x6790;
+manova_bonds &lt;- manova(cbind(current_ratio, long_term_rate, debt_equity_ratio, roe) ~ group, 
+                      data = bonds_data)
+summary(manova_bonds, test = &quot;Wilks&quot;)
+summary(manova_bonds, test = &quot;Pillai&quot;)
+summary(manova_bonds, test = &quot;Hotelling-Lawley&quot;)
+summary(manova_bonds, test = &quot;Roy&quot;)
+
+#&#x7ED8;&#x5236;&#x7BB1;&#x7EBF;&#x56FE;
+#&#x6D41;&#x52A8;&#x6BD4;&#x7387;&#x7BB1;&#x7EBF;&#x56FE;
+ggplot(bonds_data, aes(x = group, y = current_ratio, fill = group)) +
+  geom_boxplot() +
+  labs(title = &quot;&#x4E0D;&#x540C;&#x8BC4;&#x7EA7;&#x503A;&#x5238;&#x6D41;&#x52A8;&#x6BD4;&#x7387;&#x5206;&#x5E03;&quot;,
+       x = &quot;&#x503A;&#x5238;&#x8BC4;&#x7EA7;&quot;,
+       y = &quot;&#x6D41;&#x52A8;&#x6BD4;&#x7387;&quot;) +
+  theme_minimal()
+
+#&#x957F;&#x671F;&#x5229;&#x7387;&#x7BB1;&#x7EBF;&#x56FE;
+ggplot(bonds_data, aes(x = group, y = long_term_rate, fill = group)) +
+  geom_boxplot() +
+  labs(title = &quot;&#x4E0D;&#x540C;&#x8BC4;&#x7EA7;&#x503A;&#x5238;&#x957F;&#x671F;&#x5229;&#x7387;&#x5206;&#x5E03;&quot;,
+       x = &quot;&#x503A;&#x5238;&#x8BC4;&#x7EA7;&quot;,
+       y = &quot;&#x957F;&#x671F;&#x5229;&#x7387;&quot;) +
+  theme_minimal()
+
+#&#x503A;&#x52A1;&#x80A1;&#x672C;&#x6BD4;&#x7387;&#x7BB1;&#x7EBF;&#x56FE;
+ggplot(bonds_data, aes(x = group, y = debt_equity_ratio, fill = group)) +
+  geom_boxplot() +
+  labs(title = &quot;&#x4E0D;&#x540C;&#x8BC4;&#x7EA7;&#x503A;&#x5238;&#x503A;&#x52A1;&#x80A1;&#x672C;&#x6BD4;&#x7387;&#x5206;&#x5E03;&quot;,
+       x = &quot;&#x503A;&#x5238;&#x8BC4;&#x7EA7;&quot;,
+       y = &quot;&#x503A;&#x52A1;&#x80A1;&#x672C;&#x6BD4;&#x7387;&quot;) +
+  theme_minimal()
+
+#&#x80A1;&#x672C;&#x56DE;&#x62A5;&#x7387;&#x7BB1;&#x7EBF;&#x56FE;
+ggplot(bonds_data, aes(x = group, y = roe, fill = group)) +
+  geom_boxplot() +
+  labs(title = &quot;&#x4E0D;&#x540C;&#x8BC4;&#x7EA7;&#x503A;&#x5238;&#x80A1;&#x672C;&#x56DE;&#x62A5;&#x7387;&#x5206;&#x5E03;&quot;,
+       x = &quot;&#x503A;&#x5238;&#x8BC4;&#x7EA7;&quot;,
+       y = &quot;&#x80A1;&#x672C;&#x56DE;&#x62A5;&#x7387;&quot;) +
+  theme_minimal()
+</code></pre>
+<h2 id="&#x56FE;&#x7247;&#x5C55;&#x793A;">&#x56FE;&#x7247;&#x5C55;&#x793A;</h2>
+<p><img src="Rplot1.png" alt="alt text">
+<img src="Rplot2.png" alt="alt text">
+<img src="Rplot3.png" alt="alt text">
+<img src="Rplot4.png" alt="alt text">
+<img src="Rplot5.png" alt="alt text">
+<img src="Rplot6.png" alt="alt text"></p>
 
                                 
                                 </section>
@@ -276,7 +451,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"实验七","level":"1.8","depth":1,"previous":{"title":"实验六","level":"1.7","depth":1,"path":"exper/ex6/README.md","ref":"exper/ex6/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex7/README.md","mtime":"2025-05-23T12:00:34.751Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-24T06:50:44.437Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"实验七","level":"1.8","depth":1,"previous":{"title":"实验六","level":"1.7","depth":1,"path":"exper/ex6/README.md","ref":"exper/ex6/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex7/README.md","mtime":"2025-05-25T15:31:01.487Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-25T15:31:30.048Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>

@@ -238,7 +238,110 @@
     
                                 <section class="normal markdown-section">
                                 
-                                <h1 id="&#x5B9E;&#x9A8C;&#x56DB;">&#x5B9E;&#x9A8C;&#x56DB;</h1>
+                                <h1 id="&#x5B9E;&#x9A8C;&#x56DB;&#x6B63;&#x4EA4;&#x56E0;&#x5B50;&#x5206;&#x6790;orthogonal-factor-analysis">&#x5B9E;&#x9A8C;&#x56DB;&#x6B63;&#x4EA4;&#x56E0;&#x5B50;&#x5206;&#x6790;(Orthogonal factor analysis)</h1>
+<h2 id="&#x5B9E;&#x9A8C;&#x9898;&#x76EE;&#x4E00;&#xFF1A;">&#x5B9E;&#x9A8C;&#x9898;&#x76EE;&#x4E00;&#xFF1A;</h2>
+<p>&#x4E0B;&#x8868;&#x4E2D;&#x7ED9;&#x51FA;&#x4E86;&#x4E8C;&#x6218;&#x4EE5;&#x6765;&#x5965;&#x8FD0;&#x4F1A;&#x8FD0;&#x52A8;&#x5458;&#x5341;&#x9879;&#x8FD0;&#x52A8;&#x6210;&#x7EE9;&#x7684;&#x76F8;&#x5173;&#x7CFB;&#x6570;&#x77E9;&#x9635;&#xFF1A;(E9a6)
+<img src="1.jpg" alt="alt text">
+&#x5B9E;&#x9A8C;&#x8981;&#x6C42;&#xFF1A;</p>
+<h3 id="&#xFF08;1&#xFF09;&#x8BD5;&#x7531;&#x76F8;&#x5173;&#x7CFB;&#x6570;&#x77E9;&#x9635;&#x4F5C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF1B;">&#xFF08;1&#xFF09;&#x8BD5;&#x7531;&#x76F8;&#x5173;&#x7CFB;&#x6570;&#x77E9;&#x9635;&#x4F5C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF1B;</h3>
+<pre><code class="lang-{R}">library(FactoMineR)
+
+# &#xFF08;1&#xFF09;&#x8BD5;&#x7531;&#x76F8;&#x5173;&#x7CFB;&#x6570;&#x77E9;&#x9635;&#x4F5C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF1B;
+# &#xFF08;2&#xFF09;&#x8BD5;&#x6839;&#x636E;&#x56E0;&#x5B50;&#x8F7D;&#x8377;&#xFF0C;&#x5E76;&#x7ED3;&#x5408;&#x9898;&#x76EE;&#x80CC;&#x666F;&#x77E5;&#x8BC6;&#xFF0C;&#x5BF9;&#x516C;&#x5171;&#x56E0;&#x5B50;&#x8FDB;&#x884C;&#x547D;&#x540D;&#x3002;
+
+# &#xFF08;1&#xFF09;&#x8BD5;&#x7531;&#x76F8;&#x5173;&#x7CFB;&#x6570;&#x77E9;&#x9635;&#x4F5C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF1B;
+
+# &#x5B9A;&#x4E49;&#x9879;&#x76EE;&#x540D;&#x79F0;&#x548C;&#x76F8;&#x5173;&#x77E9;&#x9635;
+projects &lt;- c(&quot;100&#x7C73;&quot;, &quot;&#x8DF3;&#x8FDC;&quot;, &quot;&#x94C5;&#x7403;&quot;, &quot;&#x8DF3;&#x9AD8;&quot;, &quot;400&#x7C73;&quot;, &quot;110&#x7C73;&#x8DE8;&#x680F;&quot;, &quot;&#x94C1;&#x997C;&quot;, &quot;&#x6491;&#x7AFF;&#x8DF3;&#x9AD8;&quot;, &quot;&#x6807;&#x67AA;&quot;, &quot;1500&#x7C73;&quot;)
+cor_matrix &lt;- matrix(c(
+  1.00, 0.59, 0.35, 0.34, 0.63, 0.40, 0.28, 0.20, 0.11, -0.07,
+  0.59, 1.00, 0.42, 0.51, 0.49, 0.52, 0.31, 0.36, 0.21, 0.09,
+  0.35, 0.42, 1.00, 0.38, 0.19, 0.36, 0.73, 0.24, 0.44, -0.08,
+  0.34, 0.51, 0.38, 1.00, 0.29, 0.46, 0.27, 0.39, 0.17, 0.18,
+  0.63, 0.49, 0.19, 0.29, 1.00, 0.34, 0.17, 0.23, 0.13, 0.39,
+  0.40, 0.52, 0.36, 0.46, 0.34, 1.00, 0.32, 0.33, 0.18, 0.00,
+  0.28, 0.31, 0.73, 0.27, 0.17, 0.32, 1.00, 0.24, 0.34, -0.02,
+  0.20, 0.36, 0.24, 0.39, 0.23, 0.33, 0.24, 1.00, 0.24, 0.17,
+  0.11, 0.21, 0.44, 0.17, 0.13, 0.18, 0.34, 0.24, 1.00, -0.00,
+  -0.07, 0.09, -0.08, 0.18, 0.39, 0.00, -0.02, 0.17, -0.00, 1.00
+), nrow = 10, ncol = 10, byrow = TRUE)
+dimnames(cor_matrix) &lt;- list(projects, projects)
+
+#KMO &#x68C0;&#x9A8C;
+library(psych)
+kmo_test &lt;- KMO(cor_matrix)
+print(kmo_test)
+
+#Bartlett &#x7684;&#x7403;&#x5F62;&#x5EA6;&#x68C0;&#x9A8C;
+bartlett_test &lt;- cortest.bartlett(cor_matrix)
+print(bartlett_test)
+
+library(psych)
+library(qgraph)
+#&#x8FDB;&#x884C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF08;4&#x4E2A;&#x56E0;&#x5B50; + Promax &#x65CB;&#x8F6C;&#xFF09;
+fa_result &lt;- fa(cor_matrix, nfactors = 4, rotate = &quot;promax&quot;, fm = &quot;ml&quot;)
+colnames(fa_result$loadings) &lt;- c(&quot;&#x529B;&#x91CF;&#x4E0E;&#x6295;&#x63B7;&quot;, &quot;&#x901F;&#x5EA6;&quot;, &quot;&#x7206;&#x53D1;&quot;, &quot;&#x8010;&#x529B;&quot;)
+</code></pre>
+<p>&#x8FD9;&#x91CC;&#x9700;&#x8981;&#x6CE8;&#x610F;&#x7684;&#x662F;&#xFF0C;&#x5BF9;&#x4E8E;&#x76F8;&#x5173;&#x7CFB;&#x6570;&#x77E9;&#x9635;&#xFF0C;&#x6211;&#x9002;&#x7528;&#x4E86;cortest.bartlett&#x68C0;&#x9A8C;&#x3002;</p>
+<h3 id="&#xFF08;2&#xFF09;&#x8BD5;&#x6839;&#x636E;&#x56E0;&#x5B50;&#x8F7D;&#x8377;&#xFF0C;&#x5E76;&#x7ED3;&#x5408;&#x9898;&#x76EE;&#x80CC;&#x666F;&#x77E5;&#x8BC6;&#xFF0C;&#x5BF9;&#x516C;&#x5171;&#x56E0;&#x5B50;&#x8FDB;&#x884C;&#x547D;&#x540D;&#x3002;">&#xFF08;2&#xFF09;&#x8BD5;&#x6839;&#x636E;&#x56E0;&#x5B50;&#x8F7D;&#x8377;&#xFF0C;&#x5E76;&#x7ED3;&#x5408;&#x9898;&#x76EE;&#x80CC;&#x666F;&#x77E5;&#x8BC6;&#xFF0C;&#x5BF9;&#x516C;&#x5171;&#x56E0;&#x5B50;&#x8FDB;&#x884C;&#x547D;&#x540D;&#x3002;</h3>
+<pre><code class="lang-{R}"># **&#x65B9;&#x6CD5; 2&#xFF1A;&#x4F7F;&#x7528; qgraph &#x7F8E;&#x5316;**
+library(psych)
+library(qgraph)
+
+#&#x8FDB;&#x884C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF08;4&#x4E2A;&#x56E0;&#x5B50;&#xFF0C;Promax &#x65CB;&#x8F6C;&#xFF09;
+fa_result &lt;- fa(cor_matrix, nfactors = 4, rotate = &quot;promax&quot;, fm = &quot;ml&quot;)
+loading_matrix &lt;- as.matrix(fa_result$loadings)
+print(fa_result$loadings, cutoff = 0.4)
+factor_names &lt;- c(&quot;&#x529B;&#x91CF;&#x4E0E;&#x6295;&#x63B7;&quot;, &quot;&#x901F;&#x5EA6;&quot;, &quot;&#x7206;&#x53D1;&quot;, &quot;&#x8010;&#x529B;&quot;)
+colnames(loading_matrix) &lt;- factor_names
+
+#&#x6269;&#x5C55;&#x90BB;&#x63A5;&#x77E9;&#x9635;&#xFF1A;&#x8BA9;&#x5B83;&#x53D8;&#x6210;&#x65B9;&#x9635;
+n_projects &lt;- nrow(loading_matrix)
+n_factors &lt;- ncol(loading_matrix)
+n_total &lt;- n_projects + n_factors  # &#x603B;&#x8282;&#x70B9;&#x6570;&#xFF08;&#x9879;&#x76EE; + &#x56E0;&#x5B50;&#xFF09;
+
+adj_matrix &lt;- matrix(0, nrow = n_total, ncol = n_total)  # &#x521D;&#x59CB;&#x5316;&#x7A7A;&#x65B9;&#x9635;
+adj_matrix[1:n_projects, (n_projects + 1):n_total] &lt;- loading_matrix  # &#x53D8;&#x91CF;&#x8FDE;&#x63A5;&#x56E0;&#x5B50;
+
+#&#x5B9A;&#x4E49;&#x8282;&#x70B9;&#x540D;&#x79F0;
+node_names &lt;- c(rownames(loading_matrix), factor_names)  # &#x8FD0;&#x52A8;&#x9879;&#x76EE; + &#x56E0;&#x5B50;
+
+#&#x8BBE;&#x7F6E;&#x8282;&#x70B9;&#x989C;&#x8272;
+node_colors &lt;- c(rep(&quot;lightblue&quot;, n_projects),  # &#x8FD0;&#x52A8;&#x9879;&#x76EE;&#xFF08;&#x84DD;&#x8272;&#xFF09;
+                 rep(&quot;tomato&quot;, n_factors))      # &#x56E0;&#x5B50;&#xFF08;&#x7EA2;&#x8272;&#xFF09;
+
+#&#x4F7F;&#x7528; qgraph &#x7ED8;&#x56FE;
+qgraph(adj_matrix, layout = &quot;spring&quot;, 
+       vsize = c(rep(8, n_projects), rep(12, n_factors)),  # &#x56E0;&#x5B50;&#x70B9;&#x66F4;&#x5927;
+       esize = 3,  # &#x7EBF;&#x6761;&#x5927;&#x5C0F;
+       edge.color = &quot;darkblue&quot;,  # &#x8FDE;&#x63A5;&#x7EBF;&#x989C;&#x8272;
+       labels = node_names,  # &#x6B63;&#x786E;&#x7684;&#x56E0;&#x5B50;+&#x9879;&#x76EE;&#x540D;&#x79F0;
+       label.cex = 1.2,  # &#x6587;&#x5B57;&#x5927;&#x5C0F;
+       color = node_colors  # &#x533A;&#x5206;&#x56E0;&#x5B50; &amp; &#x9879;&#x76EE;
+       #title = &quot;&#x56E0;&#x5B50;&#x5206;&#x6790;&#x8DEF;&#x5F84;&#x56FE;&quot;
+       )
+</code></pre>
+<p><img src="Rplot.png" alt="alt text"></p>
+<p>&#x8FD8;&#x6709;&#x4E00;&#x79CD;&#x7ED8;&#x56FE;&#x65B9;&#x6CD5;&#xFF0C;&#x4E0D;&#x8FC7;&#x7ED8;&#x5236;&#x5F97;&#x56FE;&#x6709;&#x95EE;&#x9898;&#xFF0C;&#x4E0D;&#x600E;&#x4E48;&#x63A8;&#x8350;</p>
+<pre><code class="lang-{R}">library(psych)
+library(qgraph)
+
+#&#x8FDB;&#x884C;&#x56E0;&#x5B50;&#x5206;&#x6790;&#xFF08;4&#x4E2A;&#x56E0;&#x5B50; + Promax &#x65CB;&#x8F6C;&#xFF09;
+fa_result &lt;- fa(cor_matrix, nfactors = 4, rotate = &quot;promax&quot;, fm = &quot;ml&quot;)
+colnames(fa_result$loadings) &lt;- c(&quot;&#x529B;&#x91CF;&#x4E0E;&#x6295;&#x63B7;&quot;, &quot;&#x901F;&#x5EA6;&quot;, &quot;&#x7206;&#x53D1;&quot;, &quot;&#x8010;&#x529B;&quot;)
+
+#fa.diagram()
+#&#x5148;&#x7ED8;&#x5236;&#x56E0;&#x5B50;&#x5206;&#x6790;&#x8DEF;&#x5F84;&#x56FE;
+fa.diagram(fa_result, digits = 3, main = &quot;&#x56E0;&#x5B50;&#x5206;&#x6790;&#x8DEF;&#x5F84;&#x56FE;&quot;,
+           simple = FALSE, cut = 0.4, sort = TRUE, cex = 1.5)
+par(mar = c(4, 8, 4, 2))  # &#x589E;&#x5927;&#x5DE6;&#x4FA7;&#x8FB9;&#x8DDD;
+png(&quot;factor_diagram.png&quot;, width = 2000, height = 1500, res = 300)
+fa.diagram(fa_result, digits = 3, main = &quot;&#x56E0;&#x5B50;&#x5206;&#x6790;&#x8DEF;&#x5F84;&#x56FE;&quot;,
+           simple = FALSE, cut = 0.4, sort = TRUE, cex = 1.5)
+dev.off()
+</code></pre>
+<p><img src="factor_diagram.png" alt="alt text"></p>
+<p>&#x7B2C;&#x4E8C;&#x9898;&#x4E0E;&#x5176;&#x7C7B;&#x578B;&#x76F8;&#x540C;&#xFF0C;&#x4E0D;&#x8FC7;&#x591A;&#x4E86;&#x5F97;&#x5206;&#x6392;&#x540D;&#xFF0C;&#x5148;&#x653E;&#x4E00;&#x653E;</p>
 
                                 
                                 </section>
@@ -282,7 +385,7 @@
     <script>
         var gitbook = gitbook || [];
         gitbook.push(function() {
-            gitbook.page.hasChanged({"page":{"title":"实验四","level":"1.5","depth":1,"next":{"title":"实验五","level":"1.6","depth":1,"path":"exper/ex5/README.md","ref":"exper/ex5/README.md","articles":[]},"previous":{"title":"实验三","level":"1.4","depth":1,"path":"exper/ex3/README.md","ref":"exper/ex3/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex4/README.md","mtime":"2025-05-23T12:00:34.751Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-24T06:50:44.437Z"},"basePath":"../..","book":{"language":""}});
+            gitbook.page.hasChanged({"page":{"title":"实验四","level":"1.5","depth":1,"next":{"title":"实验五","level":"1.6","depth":1,"path":"exper/ex5/README.md","ref":"exper/ex5/README.md","articles":[]},"previous":{"title":"实验三","level":"1.4","depth":1,"path":"exper/ex3/README.md","ref":"exper/ex3/README.md","articles":[]},"dir":"ltr"},"config":{"gitbook":"*","theme":"default","variables":{},"plugins":["livereload"],"pluginsConfig":{"livereload":{},"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"},"showLevel":false}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"styles":{"pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css","website":"styles/website.css"}},"file":{"path":"exper/ex4/README.md","mtime":"2025-05-25T14:53:14.346Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2025-05-25T15:31:30.048Z"},"basePath":"../..","book":{"language":""}});
         });
     </script>
 </div>
